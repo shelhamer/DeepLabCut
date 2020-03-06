@@ -10,6 +10,7 @@ import tensorflow.contrib.slim as slim
 from tensorflow.contrib.slim.nets import resnet_v1
 from deeplabcut.pose_estimation_tensorflow.dataset.pose_dataset import Batch
 from deeplabcut.pose_estimation_tensorflow.nnet import losses
+from deeplabcut.pose_estimation_tensorflow.tempering import constrain_temperature
 
 net_funcs = {'resnet_50': resnet_v1.resnet_v1_50,
              'resnet_101': resnet_v1.resnet_v1_101,
@@ -75,6 +76,10 @@ class PoseNet:
                                                            'intermediate_supervision',
                                                            cfg.num_joints)
 
+            raw_temperature = prediction_layer(cfg, features, "temperature", 1)
+            temperature = constrain_temperature(raw_temperature, lo=0.1)
+            out['temperature'] = temperature
+            out['part_pred'] = out['part_pred_raw'] / temperature
         return out
 
     def get_net(self, inputs):
