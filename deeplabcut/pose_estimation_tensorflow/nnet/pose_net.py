@@ -61,8 +61,9 @@ class PoseNet:
 
         out = {}
         with tf.variable_scope('pose', reuse=reuse):
-            out['part_pred'] = prediction_layer(cfg, features, 'part_pred',
-                                                cfg.num_joints)
+            out['part_pred_raw'] = prediction_layer(cfg, features,
+                                                    'part_pred_raw',
+                                                    cfg.num_joints)
             if cfg.location_refinement:
                 out['locref'] = prediction_layer(cfg, features, 'locref_pred',
                                                  cfg.num_joints * 2)
