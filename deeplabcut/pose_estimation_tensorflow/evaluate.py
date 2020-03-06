@@ -345,7 +345,7 @@ def evaluate_network(config,Shuffles=[1],trainingsetindex=0,plotting = None,show
 
                         # Compute prediction with the CNN
                         outputs_np = sess.run(outputs, feed_dict={inputs: image_batch})
-                        scmap, locref = predict.extract_cnn_output(outputs_np, dlc_cfg)
+                        scmap, temperature, locref = predict.extract_cnn_output(outputs_np, dlc_cfg)
 
                         # Extract maximum scoring location from the heatmap, assume 1 person
                         pose = predict.argmax_pose_predict(scmap, locref, dlc_cfg.stride)

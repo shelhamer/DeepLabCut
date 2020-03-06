@@ -90,7 +90,8 @@ class PoseNet:
     def test(self, inputs):
         heads = self.get_net(inputs)
         prob = tf.sigmoid(heads['part_pred'])
-        return {'part_prob': prob, 'locref': heads['locref']}
+        return {'part_prob': prob, 'locref': heads['locref'],
+                'temperature': heads['temperature']}
 
     def inference(self,inputs):
         ''' Direct TF inference on GPU. Added with: https://arxiv.org/abs/1909.11229'''

@@ -30,6 +30,8 @@ def setup_pose_prediction(cfg):
     inputs = TF.placeholder(tf.float32, shape=[cfg.batch_size   , None, None, 3])
     net_heads = pose_net(cfg).test(inputs)
     outputs = [net_heads['part_prob']]
+    # TODO(shelhamer) configure use of temperature or not
+    outputs.append(net_heads['temperature'])
     if cfg.location_refinement:
         outputs.append(net_heads['locref'])
 
@@ -47,15 +49,17 @@ def extract_cnn_output(outputs_np, cfg):
     ''' extract locref + scmap from network '''
     scmap = outputs_np[0]
     scmap = np.squeeze(scmap)
+    temperature = outputs_np[1]
+    temperature = np.squeeze(temperature)
     locref = None
     if cfg.location_refinement:
-        locref = np.squeeze(outputs_np[1])
+        locref = np.squeeze(outputs_np[2])
         shape = locref.shape
         locref = np.reshape(locref, (shape[0], shape[1], -1, 2))
         locref *= cfg.locref_stdev
     if len(scmap.shape)==2: #for single body part!
         scmap=np.expand_dims(scmap,axis=2)
-    return scmap, locref
+    return scmap, temperature, locref
 
 def argmax_pose_predict(scmap, offmat, stride):
     """Combine scoremat and offsets to the final pose."""
