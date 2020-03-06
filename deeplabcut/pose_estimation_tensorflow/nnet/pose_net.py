@@ -169,6 +169,8 @@ class PoseNet:
 
         loss = {}
         loss['part_loss'] = add_part_loss('part_pred')
+        # DEBUG(shelhamer) report temperature as part of loss
+        loss['temperature'] = tf.math.reduce_mean(heads['temperature'])
         total_loss = loss['part_loss']
         if cfg.intermediate_supervision:
             loss['part_loss_interm'] = add_part_loss('part_pred_interm')

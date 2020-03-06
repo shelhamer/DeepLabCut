@@ -118,6 +118,7 @@ def train(config_yaml,displayiters,saveiters,maxiters,max_to_keep=5,keepdeconvwe
     batch, enqueue_op, placeholders = setup_preloading(batch_spec)
     losses = pose_net(cfg).train(batch)
     total_loss = losses['total_loss']
+    temperature = losses['temperature']
 
     for k, t in losses.items():
         TF.summary.scalar(k, t)
@@ -186,7 +187,8 @@ def train(config_yaml,displayiters,saveiters,maxiters,max_to_keep=5,keepdeconvwe
     print("Starting training....")
     for it in range(max_iter+1):
         current_lr = lr_gen.get_lr(it)
-        [_, loss_val, summary] = sess.run([train_op, total_loss, merged_summaries],
+        [_, loss_val, temperature_val, summary] = sess.run([train_op, total_loss,
+                                                            temperature, merged_summaries],
                                           feed_dict={learning_rate: current_lr})
         cum_loss += loss_val
         train_writer.add_summary(summary, it)
@@ -194,8 +196,9 @@ def train(config_yaml,displayiters,saveiters,maxiters,max_to_keep=5,keepdeconvwe
         if it % display_iters == 0 and it>0:
             average_loss = cum_loss / display_iters
             cum_loss = 0.0
-            logging.info("iteration: {} loss: {} lr: {}"
-                         .format(it, "{0:.4f}".format(average_loss), current_lr))
+            logging.info("iteration: {} loss: {} lr: {} t: {}"
+                         .format(it, "{0:.4f}".format(average_loss), current_lr,
+                                 temperature_val))
             lrf.write("{}, {:.5f}, {}\n".format(it, average_loss, current_lr))
             lrf.flush()
 
